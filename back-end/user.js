@@ -7,6 +7,7 @@ const UserSchema = new Schema(
   {
     username: String,
     password: String,
+    permission: String,
   },
   { timestamps: true },
   { collection: 'user'}

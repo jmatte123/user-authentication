@@ -33,9 +33,9 @@ app.use(logger('dev'));
 // this is our get method
 // this method fetches all available data in our database
 router.get('/getData', (req, res) => {
-  Data.find((err, data) => {
+  User.find({ username: req.query.username, password: req.query.password } , (err, user) => {
     if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true, data: data });
+    return res.json({ success: true, user: user });
   });
 });
 
@@ -52,10 +52,18 @@ router.post('/updateData', (req, res) => {
 // this is our delete method
 // this method removes existing data in our database
 router.delete('/deleteData', (req, res) => {
-  const { id } = req.body;
-  Data.findByIdAndRemove(id, (err) => {
-    if (err) return res.send(err);
-    return res.json({ success: true });
+  const username = req.query.username;
+  User.findOne({ 'username': username }, (err, user) => {
+    if (err) return handleError(err);
+    if (user.permission === "admin") {
+      User.findOneAndDelete(username, (err) => {
+        if (err) return res.json({ success: false, error: err });
+        return res.json({ 
+          success: true,
+          removedUser: username
+        });
+      });
+    }
   });
 });
 
@@ -63,9 +71,10 @@ router.delete('/deleteData', (req, res) => {
 // this method adds new data in our database
 router.post('/putData', (req, res) => {
   let user = new User();
-  const { username, password } = req.query;
+  const { username, password, permission } = req.query;
   user.username = username;
-  user.password = password
+  user.password = password;
+  user.permission = permission;
   user.save((err) => {
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true });
