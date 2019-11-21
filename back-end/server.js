@@ -4,7 +4,7 @@ const express = require('express');
 var cors = require('cors');
 const bodyParser = require('body-parser');
 const logger = require('morgan');
-const Data = require('./data');
+const User = require('./user');
 
 const API_PORT = 3001;
 const app = express();
@@ -12,10 +12,10 @@ app.use(cors());
 const router = express.Router();
 
 // this is our MongoDB database
-const dbRoute = 'mongodb://127.0.0.1:27017/';
+const dbRoute = 'mongodb://127.0.0.1:27017/UserAuth';
 
 // connects our back end code with the database
-mongoose.connect(dbRoute, { useNewUrlParser: true });
+mongoose.connect(dbRoute, { useNewUrlParser: true, useUnifiedTopology: true });
 
 let db = mongoose.connection;
 
@@ -62,19 +62,11 @@ router.delete('/deleteData', (req, res) => {
 // this is our create methid
 // this method adds new data in our database
 router.post('/putData', (req, res) => {
-  let data = new Data();
-
-  const { id, message } = req.body;
-
-  if ((!id && id !== 0) || !message) {
-    return res.json({
-      success: false,
-      error: 'INVALID INPUTS',
-    });
-  }
-  data.message = message;
-  data.id = id;
-  data.save((err) => {
+  let user = new User();
+  const { username, password } = req.query;
+  user.username = username;
+  user.password = password
+  user.save((err) => {
     if (err) return res.json({ success: false, error: err });
     return res.json({ success: true });
   });
