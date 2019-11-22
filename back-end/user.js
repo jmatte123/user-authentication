@@ -5,12 +5,23 @@ const Schema = mongoose.Schema;
 // this will be our data base's data structure 
 const UserSchema = new Schema(
   {
-    username: String,
-    password: String,
-    permission: String,
+    username: {
+      type: String,
+      unique: true,
+      required: true
+    },
+    password: {
+      type: String,
+      required: true
+    },
+    permission: {
+      type: String,
+      enum: ['admin', 'inspector', 'manager', 'customer', 'csr', 'operator'],
+      required: true
+    },
   },
   { timestamps: true },
-  { collection: 'user'}
+  { colletion: 'users' }
 );
 
 // export the new Schema so we could modify it using Node.js

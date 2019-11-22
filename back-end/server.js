@@ -15,7 +15,12 @@ const router = express.Router();
 const dbRoute = 'mongodb://127.0.0.1:27017/UserAuth';
 
 // connects our back end code with the database
-mongoose.connect(dbRoute, { useNewUrlParser: true, useUnifiedTopology: true });
+mongoose.connect(dbRoute, { 
+  useNewUrlParser: true, 
+  useUnifiedTopology: true, 
+  useCreateIndex: true, 
+  useFindAndModify: false 
+});
 
 let db = mongoose.connection;
 
@@ -33,19 +38,44 @@ app.use(logger('dev'));
 // this is our get method
 // this method fetches all available data in our database
 router.get('/getData', (req, res) => {
-  User.find({ username: req.query.username, password: req.query.password } , (err, user) => {
-    if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true, user: user });
+  User.find({ 
+    username: req.query.username,
+    password: req.query.password
+   }, (err, user) => {
+    if (err || user.length <= 0) return res.json({ 
+      success: false, 
+      user: user.length,
+      error: err 
+    });
+    return res.json({ 
+      success: true, 
+      user: user.length,
+      user: user 
+    });
   });
 });
 
 // this is our update method
 // this method overwrites existing data in our database
 router.post('/updateData', (req, res) => {
-  const { id, update } = req.body;
-  Data.findByIdAndUpdate(id, update, (err) => {
-    if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true });
+  const { username, password, permission } = req.query;
+  if (username === undefined) return res.json({
+    success: false,
+    username: undefined
+  });
+  User.findOne({ username: username }, (err, user) => {
+    if (err) return res.json({ 
+      success: false, 
+      error: err 
+    });
+    if (req.query.username != undefined) user.username = username;
+    if (req.query.password != undefined) user.password = password;
+    if (req.query.permission != undefined) user.permission = permission;
+    user.save();
+    return res.json({ 
+      success: true,
+      updatedUser: user
+    });
   });
 });
 
@@ -57,7 +87,10 @@ router.delete('/deleteData', (req, res) => {
     if (err) return handleError(err);
     if (user.permission === "admin") {
       User.findOneAndDelete(username, (err) => {
-        if (err) return res.json({ success: false, error: err });
+        if (err) return res.json({ 
+          success: false, 
+          error: err 
+        });
         return res.json({ 
           success: true,
           removedUser: username
@@ -76,8 +109,13 @@ router.post('/putData', (req, res) => {
   user.password = password;
   user.permission = permission;
   user.save((err) => {
-    if (err) return res.json({ success: false, error: err });
-    return res.json({ success: true });
+    if (err) return res.json({ 
+      success: false, 
+      error: err 
+    });
+    return res.json({ 
+      success: true 
+    });
   });
 });
 
