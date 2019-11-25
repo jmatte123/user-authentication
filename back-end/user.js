@@ -19,6 +19,17 @@ const UserSchema = new Schema(
       enum: ['admin', 'inspector', 'manager', 'customer', 'csr', 'operator'],
       required: true
     },
+    firstName: {
+      type: String,
+      required: true
+    },
+    lastName: {
+      type: String,
+      required: true
+    },
+    email : {
+      type: String
+    }
   },
   { timestamps: true },
   { colletion: 'users' }

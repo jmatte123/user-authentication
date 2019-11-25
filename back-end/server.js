@@ -2,9 +2,9 @@
 const mongoose = require('mongoose');
 const express = require('express');
 var cors = require('cors');
-const bodyParser = require('body-parser');
 const logger = require('morgan');
 const User = require('./user');
+var jwt = require('jsonwebtoken');
 
 const API_PORT = 3001;
 const app = express();
@@ -21,19 +21,37 @@ mongoose.connect(dbRoute, {
   useCreateIndex: true, 
   useFindAndModify: false 
 });
-
 let db = mongoose.connection;
 
+// connect to the database
 db.once('open', () => console.log('connected to the database'));
 
 // checks if connection with the database is successful
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
+// use the morgon logger to log the api requests
+app.use(logger('common'));
 
-// (optional) only made for logging and
-// bodyParser, parses the request body to be a readable json format
-app.use(bodyParser.urlencoded({ extended: false }));
-app.use(bodyParser.json());
-app.use(logger('dev'));
+// this method will send a authentication token back to the client if
+// the user and password are correct.
+router.get('/authenticate', (req, res) => {
+  User.find({ 
+    username: req.query.username,
+    password: req.query.password
+   }, (err, user) => {
+    if (err || user.length <= 0) return res.json({ 
+      success: false,
+      error: err 
+    });
+
+    var token = jwt.sign(
+      { username: user.username }, 
+      'thisIsAInventoryManagementSystem123', 
+      { expiresIn: 120}
+    );
+
+    res.send(token);
+  });
+});
 
 // this is our get method
 // this method fetches all available data in our database
@@ -104,10 +122,12 @@ router.delete('/deleteData', (req, res) => {
 // this method adds new data in our database
 router.post('/putData', (req, res) => {
   let user = new User();
-  const { username, password, permission } = req.query;
+  const { username, password, permission, firstName, lastName } = req.query;
   user.username = username;
   user.password = password;
   user.permission = permission;
+  user.firstName = firstName;
+  user.lastName = lastName;
   user.save((err) => {
     if (err) return res.json({ 
       success: false, 
