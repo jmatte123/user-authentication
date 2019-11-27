@@ -29,7 +29,7 @@ db.once('open', () => console.log('connected to the database'));
 // checks if connection with the database is successful
 db.on('error', console.error.bind(console, 'MongoDB connection error:'));
 // use the morgon logger to log the api requests
-app.use(logger('common'));
+app.use(logger('dev'));
 
 // this method will send a authentication token back to the client if
 // the user and password are correct.
@@ -42,7 +42,7 @@ router.get('/authenticate', (req, res) => {
       success: false,
       error: err 
     });
-
+    console.log('hit');
     var token = jwt.sign(
       { username: user.username }, 
       'thisIsAInventoryManagementSystem123', 
