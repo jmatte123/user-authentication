@@ -6,9 +6,15 @@ const logger = require('morgan');
 const User = require('./user');
 var jwt = require('jsonwebtoken');
 
-const API_PORT = 3001;
+const API_PORT = 9000;
 const app = express();
-app.use(cors());
+
+var corsOptions = {
+  origin: false,
+  optionsSuccessStatus: 200 // some legacy browsers (IE11, various SmartTVs) choke on 204
+}
+
+app.use(cors(corsOptions));
 const router = express.Router();
 
 // this is our MongoDB database
@@ -42,14 +48,12 @@ router.get('/authenticate', (req, res) => {
       success: false,
       error: err 
     });
-    console.log('hit');
-    var token = jwt.sign(
+    token = jwt.sign(
       { username: user.username }, 
       'thisIsAInventoryManagementSystem123', 
       { expiresIn: 120}
     );
-
-    res.send(token);
+    return res.send(token);
   });
 });
 

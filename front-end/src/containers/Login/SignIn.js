@@ -12,7 +12,7 @@ import { makeStyles } from '@material-ui/core/styles';
 import Container from '@material-ui/core/Container';
 import Image from '../images/bill-oxford--fGqsewtsJY-unsplash.png'; 
 import Image1 from '../images/shop_stream_logo.png'; 
-const API = require('axios');
+const API = require('superagent');
 
 function Copyright() {
   return (
@@ -75,18 +75,13 @@ export default function SignIn() {
 
   function handleSubmit(event) {
     console.log('hit');
-    return API.get('http://localhost:3001/api/authenticate', {
-      params: {
-        username: username,
-        password: password
-      },
-      timeout: 20000000
-    }).then(function(response) {
-      console.log(response);
-      return;
-    }).catch(function(error) {
-      console.error(error);
-    });
+    return API.get('http://127.0.0.1:9000/api/authenticate').query({
+      username: username,
+      password: password
+    }).end((err, res) => {
+      console.log(err);
+      console.log(res.json());
+    })
     //console.log(token)
     //return '/dashboard'
     // if () {
