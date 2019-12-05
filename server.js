@@ -30,6 +30,7 @@ let db = mongoose.connection;
 db.once('open', () => console.log('connected to the database'));
 
 router.get('/authenticate', (req, res) => {
+  if (req.headers.token === undefined) return res.json({ success: false });
   const token = req.headers.token;
   // verify a token symmetric
   jwt.verify(token, SECRET, function(err, decoded) {
@@ -68,7 +69,7 @@ router.get('/signIn', (req, res) => {
 
 // this is our get method
 // this method fetches all available data in our database
-router.get('/getUsers', authenticate, async (req, res) => {
+router.get('/getUsers', async (req, res) => {
   var peopleJSON = await User.find({});
   if (peopleJSON === null) return res.json({ 
     success: false, 
@@ -84,7 +85,7 @@ router.get('/getUsers', authenticate, async (req, res) => {
 
 // this is our update method
 // this method overwrites existing data in our database
-router.post('/updateData', authenticate, (req, res) => {
+router.post('/updateData', (req, res) => {
   const { username, password, permission } = req.query;
   if (username === undefined) return res.json({
     success: false,
@@ -108,7 +109,7 @@ router.post('/updateData', authenticate, (req, res) => {
 
 // this is our delete method
 // this method removes existing data in our database
-router.delete('/deleteData', authenticate, (req, res) => {
+router.delete('/deleteData', (req, res) => {
   const username = req.query.username;
   User.findOne({ 'username': username }, (err, user) => {
     if (err) return handleError(err);
